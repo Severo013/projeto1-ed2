@@ -8,8 +8,8 @@ typedef struct {
 } Registro;
 
 typedef struct NoEspacoLivre {
-    int offset; // Posição do espaço livre no arquivo
     int tamanho; // Tamanho do espaço livre
+    const char marcador = '*'; // Marcador para indicar que o espaço está livre
     int prox; // Offset para o próximo nó na lista encadeada (-1 se não houver próximo)
 } NoEspacoLivre;
 
@@ -28,5 +28,5 @@ int carregarRemocoes(ChaveRemocao** vetorRemocoes);
 void inicializarArquivo(const char* nomeArquivo);
 CabecalhoArquivo buscarCabecalho(FILE* arquivo);
 void inserirRegistro(FILE* arquivo, Registro* novoRegistro);
-void removerRegistro(FILE* arquivo, const char* idAluno, const char* siglaDisciplina);
+void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao);
 void compactarArquivo(const char* nomeArquivo);

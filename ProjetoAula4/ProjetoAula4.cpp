@@ -35,13 +35,21 @@ int main()
 		int indice;
 		switch (opcao) {
 		case 1:
-			printf("Registros disponíveis: \n");
+			//printf("Registros disponíveis: \n");
+			//for (int i = 0; i < numeroRegistroInsere; i++) {
+
+			//	printf("%d. %s - %s - %s - %s - %f - %f\n",
+			//			i, vetorInsercoes[i].idAluno, vetorInsercoes[i].siglaDisciplina, vetorInsercoes[i].nomeAluno, 
+			//			vetorInsercoes[i].nomeDisciplina, vetorInsercoes[i].media, vetorInsercoes[i].frequencia);
+
+			//}
+			//printf("\nEscolha um registro para inserir: ");
+			//scanf("%d", &indice);
+
 			for (int i = 0; i < numeroRegistroInsere; i++) {
-				printf("%d. %s - %s\n", i, vetorInsercoes[i].idAluno, vetorInsercoes[i].siglaDisciplina);
+				inserirRegistro(arquivo, &vetorInsercoes[i]);
 			}
-			printf("\nEscolha um registro para inserir: ");
-			scanf("%d", &indice);
-			inserirRegistro(arquivo, &vetorInsercoes[indice]);
+			//inserirRegistro(arquivo, &vetorInsercoes[indice]);
 			break;
 		case 2:
 			printf("Registros disponíveis: \n");
@@ -50,7 +58,7 @@ int main()
 			}
 			printf("Escolha um registro para remover: ");
 			scanf("%d", &indice);
-			removerRegistro(arquivo, vetorRemocoes[indice].idAluno, vetorRemocoes[indice].siglaDisciplina);
+			removerRegistro(arquivo, vetorRemocoes[indice]);
 			break;
 			case 3:
 			    compactarArquivo(nomeArquivo);

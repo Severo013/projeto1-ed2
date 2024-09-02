@@ -140,13 +140,12 @@ void inserirRegistro(FILE* arquivo, Registro* novoRegistro) {
 	fwrite(buffer, tamanhoRegistro - sizeof(int), 1, arquivo);
 }
 
-void removerRegistro(FILE* arquivo, const char* idAluno, const char* siglaDisciplina) {
+void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao) {
+
+	char chaveParaRemocao[8];
+	sprintf(chaveParaRemocao, "%s%s", chaveRemocao.idAluno, chaveRemocao.siglaDisciplina);
 
 	CabecalhoArquivo cabecalho = buscarCabecalho(arquivo);
-
-	char chave[8];
-	sprintf(chave, "%s%s", idAluno, siglaDisciplina);
-
 	int offsetAtual = sizeof(CabecalhoArquivo);
 
 	int tamanhoRegistro;
@@ -155,22 +154,37 @@ void removerRegistro(FILE* arquivo, const char* idAluno, const char* siglaDiscip
 		char buffer[256];
 		fread(buffer, tamanhoRegistro - sizeof(int), 1, arquivo);
 
-		ChaveRemocao chaveRemocao;
-		strcpy(chaveRemocao.idAluno, strtok(buffer, "#"));
-		strcpy(chaveRemocao.siglaDisciplina, strtok(NULL, "#"));
+		if (buffer[0] == '*') {
+			offsetAtual += tamanhoRegistro;
+			fseek(arquivo, offsetAtual, SEEK_SET);
+			continue;
+		}
 
-		if (strncmp(strcat(chaveRemocao.idAluno, chaveRemocao.siglaDisciplina), chave, 6) == 0) {
-			
+		// Extrai idAluno e siglaDisciplina do buffer
+		char* idBuffer = strtok(buffer, "#");
+		char* siglaBuffer = strtok(NULL, "#");
+
+		if (idBuffer == NULL || siglaBuffer == NULL) {
+			printf("Erro ao extrair campos do registro.\n");
+			return;
+		}
+
+		char chaveEncontrada[8];
+		sprintf(chaveEncontrada, "%s%s", idBuffer, siglaBuffer);
+
+		if (strncmp(chaveEncontrada, chaveParaRemocao, 6) == 0) {
+
 			// Encontrou o registro, marcar como espaço livre
 			fseek(arquivo, offsetAtual, SEEK_SET);
+
 			NoEspacoLivre novoEspaco;
-			novoEspaco.offset = offsetAtual;
 			novoEspaco.tamanho = tamanhoRegistro;
 			novoEspaco.prox = cabecalho.inicioLista;
-
-			//TODO: Arrumar para escrever o tamanho*proximo do jeito que a prof pediu
-			fwrite(&novoEspaco, sizeof(NoEspacoLivre), 1, arquivo);
 			cabecalho.inicioLista = offsetAtual;
+
+			fwrite(&novoEspaco.tamanho, sizeof(int), 1, arquivo);
+			fwrite(&novoEspaco.marcador, sizeof(const char), 1, arquivo);
+			fwrite(&novoEspaco.prox, sizeof(int), 1, arquivo);
 
 			fseek(arquivo, 0, SEEK_SET);
 			fwrite(&cabecalho, sizeof(CabecalhoArquivo), 1, arquivo);
@@ -188,6 +202,7 @@ void removerRegistro(FILE* arquivo, const char* idAluno, const char* siglaDiscip
 }
 
 void compactarArquivo(const char* nomeArquivo) {
+
 	FILE* arquivo = fopen(nomeArquivo, "rb");
 	if (arquivo == NULL) {
 		perror("Erro ao abrir o arquivo");
@@ -201,8 +216,7 @@ void compactarArquivo(const char* nomeArquivo) {
 		return;
 	}
 
-	CabecalhoArquivo cabecalho;
-	fread(&cabecalho, sizeof(CabecalhoArquivo), 1, arquivo);
+	CabecalhoArquivo cabecalho = buscarCabecalho(arquivo);
 	fwrite(&cabecalho, sizeof(CabecalhoArquivo), 1, arquivoTemp);
 
 	int tamanhoRegistro;
@@ -218,8 +232,17 @@ void compactarArquivo(const char* nomeArquivo) {
 
 	fclose(arquivo);
 	fclose(arquivoTemp);
-	remove(nomeArquivo);
-	rename("temp.bin", nomeArquivo);
 
-	printf("\nCompactação concluída.\n");
+	if (remove(nomeArquivo) != 0) {
+		perror("Erro ao remover o arquivo original");
+		return;
+	}
+
+	// Renomear o arquivo temporário
+	if (rename("temp.bin", nomeArquivo) != 0) {
+		perror("Erro ao renomear o arquivo temporário");
+	}
+	else {
+		printf("Arquivo compactado com sucesso.\n");
+	}
 }
