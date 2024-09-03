@@ -15,12 +15,6 @@ int main()
 	const char* nomeArquivo = "dados.bin";
 	inicializarArquivo(nomeArquivo);
 
-	FILE* arquivo = fopen(nomeArquivo, "rb+");
-	if (arquivo == NULL) {
-		perror("Erro ao abrir arquivo principal");
-		return EXIT_FAILURE;
-	}
-
 	int opcao;
 	do {
 		printf("Menu:\n");
@@ -35,21 +29,24 @@ int main()
 		int indice;
 		switch (opcao) {
 		case 1:
-			//printf("Registros disponíveis: \n");
-			//for (int i = 0; i < numeroRegistroInsere; i++) {
 
-			//	printf("%d. %s - %s - %s - %s - %f - %f\n",
-			//			i, vetorInsercoes[i].idAluno, vetorInsercoes[i].siglaDisciplina, vetorInsercoes[i].nomeAluno, 
-			//			vetorInsercoes[i].nomeDisciplina, vetorInsercoes[i].media, vetorInsercoes[i].frequencia);
-
-			//}
-			//printf("\nEscolha um registro para inserir: ");
-			//scanf("%d", &indice);
-
+			printf("Registros disponíveis: \n");
 			for (int i = 0; i < numeroRegistroInsere; i++) {
-				inserirRegistro(arquivo, &vetorInsercoes[i]);
+
+				printf("%d. %s - %s - %s - %s - %f - %f\n",
+					i, vetorInsercoes[i].idAluno, vetorInsercoes[i].siglaDisciplina, vetorInsercoes[i].nomeAluno,
+					vetorInsercoes[i].nomeDisciplina, vetorInsercoes[i].media, vetorInsercoes[i].frequencia);
+
 			}
-			//inserirRegistro(arquivo, &vetorInsercoes[indice]);
+			printf("\nEscolha um registro para inserir: ");
+			scanf("%d", &indice);
+
+			inserirRegistro(nomeArquivo, &vetorInsercoes[indice]);
+
+			//for (int i = 0; i < numeroRegistroInsere; i++) {
+			//	inserirRegistro(nomeArquivo, &vetorInsercoes[i]);
+			//}
+
 			break;
 		case 2:
 			printf("Registros disponíveis: \n");
@@ -58,11 +55,11 @@ int main()
 			}
 			printf("Escolha um registro para remover: ");
 			scanf("%d", &indice);
-			removerRegistro(arquivo, vetorRemocoes[indice]);
+			removerRegistro(nomeArquivo, vetorRemocoes[indice]);
 			break;
-			case 3:
-			    compactarArquivo(nomeArquivo);
-			    break;
+		case 3:
+			compactarArquivo(nomeArquivo);
+			break;
 		case 4:
 			printf("Saindo...\n");
 			break;
@@ -74,6 +71,5 @@ int main()
 
 	free(vetorInsercoes);
 	free(vetorRemocoes);
-	fclose(arquivo);
 	return 0;
 }

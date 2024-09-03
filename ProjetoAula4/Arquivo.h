@@ -27,6 +27,6 @@ int carregarInsercoes(Registro** vetorInsercoes);
 int carregarRemocoes(ChaveRemocao** vetorRemocoes);
 void inicializarArquivo(const char* nomeArquivo);
 CabecalhoArquivo buscarCabecalho(FILE* arquivo);
-void inserirRegistro(FILE* arquivo, Registro* novoRegistro);
-void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao);
+void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro);
+void removerRegistro(const char* nomeArquivo, ChaveRemocao chaveRemocao);
 void compactarArquivo(const char* nomeArquivo);

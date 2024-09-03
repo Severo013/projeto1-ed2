@@ -87,7 +87,13 @@ CabecalhoArquivo buscarCabecalho(FILE* arquivo) {
 	return cabecalho;
 }
 
-void inserirRegistro(FILE* arquivo, Registro* novoRegistro) {
+void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro) {
+
+	FILE* arquivo = fopen(nomeArquivo, "rb+");
+	if (arquivo == NULL) {
+		perror("Erro ao abrir arquivo principal");
+		return;
+	}
 
 	CabecalhoArquivo cabecalho = buscarCabecalho(arquivo);
 
@@ -128,6 +134,8 @@ void inserirRegistro(FILE* arquivo, Registro* novoRegistro) {
 
 			fseek(arquivo, 0, SEEK_SET);
 			fwrite(&cabecalho, sizeof(CabecalhoArquivo), 1, arquivo);
+
+			fclose(arquivo);
 			return;
 		}
 		offsetAnterior = offsetAtual;
@@ -138,9 +146,16 @@ void inserirRegistro(FILE* arquivo, Registro* novoRegistro) {
 	fseek(arquivo, 0, SEEK_END);
 	fwrite(&tamanhoRegistro, sizeof(int), 1, arquivo);
 	fwrite(buffer, tamanhoRegistro - sizeof(int), 1, arquivo);
+	fclose(arquivo);
 }
 
-void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao) {
+void removerRegistro(const char* nomeArquivo, ChaveRemocao chaveRemocao) {
+
+	FILE* arquivo = fopen(nomeArquivo, "rb+");
+	if (arquivo == NULL) {
+		perror("Erro ao abrir arquivo principal");
+		return;
+	}
 
 	char chaveParaRemocao[8];
 	sprintf(chaveParaRemocao, "%s%s", chaveRemocao.idAluno, chaveRemocao.siglaDisciplina);
@@ -166,6 +181,7 @@ void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao) {
 
 		if (idBuffer == NULL || siglaBuffer == NULL) {
 			printf("Erro ao extrair campos do registro.\n");
+			fclose(arquivo);
 			return;
 		}
 
@@ -190,6 +206,7 @@ void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao) {
 			fwrite(&cabecalho, sizeof(CabecalhoArquivo), 1, arquivo);
 
 			printf("\nRegistro removido.\n");
+			fclose(arquivo);
 
 			return;
 		}
@@ -199,6 +216,7 @@ void removerRegistro(FILE* arquivo, ChaveRemocao chaveRemocao) {
 	}
 
 	printf("Registro não encontrado.\n");
+	fclose(arquivo);
 }
 
 void compactarArquivo(const char* nomeArquivo) {
