@@ -15,6 +15,8 @@ typedef struct NoEspacoLivre {
 
 typedef struct {
     int inicioLista; // Offset do primeiro nó da lista encadeada de espaços livres
+    int numeroInsercoes;
+    int numeroRemocoes;
 } CabecalhoArquivo;
 
 typedef struct {
@@ -28,5 +30,7 @@ int carregarRemocoes(ChaveRemocao** vetorRemocoes);
 void inicializarArquivo(const char* nomeArquivo);
 CabecalhoArquivo buscarCabecalho(FILE* arquivo);
 void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro);
+void EscreverCabecalho(FILE* arquivo, CabecalhoArquivo& cabecalho);
+void EscreverRegistro(int& tamanhoRegistro, FILE* arquivo, char  buffer[256]);
 void removerRegistro(const char* nomeArquivo, ChaveRemocao chaveRemocao);
 void compactarArquivo(const char* nomeArquivo);
