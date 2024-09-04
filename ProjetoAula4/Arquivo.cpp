@@ -74,7 +74,9 @@ void inicializarArquivo(const char* nomeArquivo) {
 
 		CabecalhoArquivo cabecalho;
 		cabecalho.inicioLista = -1;
-		EscreverCabecalho(arquivo, &cabecalho);
+		cabecalho.numeroInsercoes = 0;
+		cabecalho.numeroRemocoes = 0;
+		escreverCabecalho(arquivo, &cabecalho);
 	}
 	fclose(arquivo);
 }
@@ -87,13 +89,13 @@ CabecalhoArquivo buscarCabecalho(FILE* arquivo) {
 	return cabecalho;
 }
 
-void EscreverCabecalho(FILE* arquivo, CabecalhoArquivo* cabecalho)
+void escreverCabecalho(FILE* arquivo, CabecalhoArquivo* cabecalho)
 {
 	fseek(arquivo, 0, SEEK_SET);
 	fwrite(cabecalho, sizeof(CabecalhoArquivo), 1, arquivo);
 }
 
-void EscreverRegistro(int* tamanhoRegistro, FILE* arquivo, char  buffer[256])
+void escreverRegistro(int* tamanhoRegistro, FILE* arquivo, char  buffer[256])
 {
 	fwrite(tamanhoRegistro, sizeof(int), 1, arquivo);
 	fwrite(buffer, *tamanhoRegistro - sizeof(int), 1, arquivo);
@@ -141,9 +143,10 @@ void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro) {
 			}
 
 			fseek(arquivo, offsetAtual, SEEK_SET);
-			EscreverRegistro(&tamanhoRegistro, arquivo, buffer);
+			escreverRegistro(&tamanhoRegistro, arquivo, buffer);
 
-			EscreverCabecalho(arquivo, &cabecalho);
+			cabecalho.numeroInsercoes++;
+			escreverCabecalho(arquivo, &cabecalho);
 
 			fclose(arquivo);
 			return;
@@ -154,7 +157,11 @@ void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro) {
 
 	// Se nenhum espaço livre foi encontrado, inserir no final do arquivo
 	fseek(arquivo, 0, SEEK_END);
-	EscreverRegistro(&tamanhoRegistro, arquivo, buffer);
+	escreverRegistro(&tamanhoRegistro, arquivo, buffer);
+
+	cabecalho.numeroInsercoes++;
+	escreverCabecalho(arquivo, &cabecalho);
+
 	fclose(arquivo);
 }
 
@@ -207,11 +214,10 @@ void removerRegistro(const char* nomeArquivo, ChaveRemocao chaveRemocao) {
 			novoEspaco.prox = cabecalho.inicioLista;
 			cabecalho.inicioLista = offsetAtual;
 
-			fwrite(&novoEspaco.tamanho, sizeof(int), 1, arquivo);
-			fwrite(&novoEspaco.marcador, sizeof(const char), 1, arquivo);
-			fwrite(&novoEspaco.prox, sizeof(int), 1, arquivo);
+			escreverNoEspacoLivre(novoEspaco, arquivo);
 
-			EscreverCabecalho(arquivo, &cabecalho);
+			cabecalho.numeroRemocoes++;
+			escreverCabecalho(arquivo, &cabecalho);
 
 			printf("\nRegistro removido.\n");
 			fclose(arquivo);
@@ -225,6 +231,13 @@ void removerRegistro(const char* nomeArquivo, ChaveRemocao chaveRemocao) {
 
 	printf("Registro não encontrado.\n");
 	fclose(arquivo);
+}
+
+void escreverNoEspacoLivre(NoEspacoLivre novoEspaco, FILE* arquivo)
+{
+	fwrite(&novoEspaco.tamanho, sizeof(int), 1, arquivo);
+	fwrite(&novoEspaco.marcador, sizeof(const char), 1, arquivo);
+	fwrite(&novoEspaco.prox, sizeof(int), 1, arquivo);
 }
 
 void compactarArquivo(const char* nomeArquivo) {
@@ -243,7 +256,8 @@ void compactarArquivo(const char* nomeArquivo) {
 	}
 
 	CabecalhoArquivo cabecalho = buscarCabecalho(arquivo);
-	EscreverCabecalho(arquivoTemp, &cabecalho);
+	cabecalho.inicioLista = -1;
+	escreverCabecalho(arquivoTemp, &cabecalho);
 
 	int tamanhoRegistro;
 	while (fread(&tamanhoRegistro, sizeof(int), 1, arquivo) == 1) {
@@ -264,7 +278,6 @@ void compactarArquivo(const char* nomeArquivo) {
 		return;
 	}
 
-	// Renomear o arquivo temporário
 	if (rename("temp.bin", nomeArquivo) != 0) {
 		perror("Erro ao renomear o arquivo temporário");
 	}

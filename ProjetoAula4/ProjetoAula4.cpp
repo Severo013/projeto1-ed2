@@ -15,6 +15,8 @@ int main()
 	const char* nomeArquivo = "dados.bin";
 	inicializarArquivo(nomeArquivo);
 
+	CabecalhoArquivo cabecalho;
+
 	int opcao;
 	do {
 		printf("Menu:\n");
@@ -29,7 +31,6 @@ int main()
 		int indice;
 		switch (opcao) {
 		case 1:
-
 			printf("Registros disponíveis: \n");
 			for (int i = 0; i < numeroRegistroInsere; i++) {
 
@@ -38,15 +39,14 @@ int main()
 					vetorInsercoes[i].nomeDisciplina, vetorInsercoes[i].media, vetorInsercoes[i].frequencia);
 
 			}
+
 			printf("\nEscolha um registro para inserir: ");
 			scanf("%d", &indice);
 
 			inserirRegistro(nomeArquivo, &vetorInsercoes[indice]);
 
-			//for (int i = 0; i < numeroRegistroInsere; i++) {
-			//	inserirRegistro(nomeArquivo, &vetorInsercoes[i]);
-			//}
-
+			cabecalho = buscarCabecalho(fopen(nomeArquivo, "rb"));
+			printf("Número de registros inseridos: %d\n", cabecalho.numeroInsercoes);
 			break;
 		case 2:
 			printf("Registros disponíveis: \n");
@@ -56,6 +56,9 @@ int main()
 			printf("Escolha um registro para remover: ");
 			scanf("%d", &indice);
 			removerRegistro(nomeArquivo, vetorRemocoes[indice]);
+
+			cabecalho = buscarCabecalho(fopen(nomeArquivo, "rb"));
+			printf("Número de registros removidos: %d\n", cabecalho.numeroRemocoes);
 			break;
 		case 3:
 			compactarArquivo(nomeArquivo);
