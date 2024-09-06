@@ -126,7 +126,11 @@ void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro) {
 	int offsetAtual = cabecalho.inicioLista;
 	while (offsetAtual != -1) {
 		fseek(arquivo, offsetAtual, SEEK_SET);
-		fread(&espacoLivre, sizeof(NoEspacoLivre), 1, arquivo);
+
+		//fread(&espacoLivre, sizeof(NoEspacoLivre), 1, arquivo);
+		fread(&espacoLivre.tamanho, sizeof(int), 1, arquivo);
+		fseek(arquivo, sizeof(const char), SEEK_CUR);
+		fread(&espacoLivre.prox, sizeof(int), 1, arquivo);
 
 		if (espacoLivre.tamanho >= tamanhoRegistro) {
 			// Encontrou um espaço livre adequado
@@ -143,7 +147,7 @@ void inserirRegistro(const char* nomeArquivo, Registro* novoRegistro) {
 			}
 
 			fseek(arquivo, offsetAtual, SEEK_SET);
-			escreverRegistro(&tamanhoRegistro, arquivo, buffer);
+			escreverRegistro(&espacoLivre.tamanho, arquivo, buffer);
 
 			cabecalho.numeroInsercoes++;
 			escreverCabecalho(arquivo, &cabecalho);

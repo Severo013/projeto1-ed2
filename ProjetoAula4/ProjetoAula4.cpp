@@ -16,6 +16,7 @@ int main()
 	inicializarArquivo(nomeArquivo);
 
 	CabecalhoArquivo cabecalho;
+	FILE* arq;
 
 	int opcao;
 	do {
@@ -45,8 +46,10 @@ int main()
 
 			inserirRegistro(nomeArquivo, &vetorInsercoes[indice]);
 
-			cabecalho = buscarCabecalho(fopen(nomeArquivo, "rb"));
+			arq = fopen(nomeArquivo, "rb");
+			cabecalho = buscarCabecalho(arq);
 			printf("Número de registros inseridos: %d\n", cabecalho.numeroInsercoes);
+			fclose(arq);
 			break;
 		case 2:
 			printf("Registros disponíveis: \n");
@@ -57,8 +60,10 @@ int main()
 			scanf("%d", &indice);
 			removerRegistro(nomeArquivo, vetorRemocoes[indice]);
 
-			cabecalho = buscarCabecalho(fopen(nomeArquivo, "rb"));
+			arq = fopen(nomeArquivo, "rb");
+			cabecalho = buscarCabecalho(arq);
 			printf("Número de registros removidos: %d\n", cabecalho.numeroRemocoes);
+			fclose(arq);
 			break;
 		case 3:
 			compactarArquivo(nomeArquivo);
